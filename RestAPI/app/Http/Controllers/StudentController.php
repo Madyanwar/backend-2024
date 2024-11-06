@@ -12,14 +12,21 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = Student::all();
         
-        $response = [
-            'message' => 'Success Showing All Students Data',
-            'data' => $students
-        ];
+        $students = Student::all();
 
-        return response()->json($response, 200);
+		if ($students) {
+			$response= [
+				'message' => 'Successfully view all student',
+				'data' => $students,
+			];
+			return response()->json($response, 200);
+		} else {
+			$response = [
+				'message' => 'Student not found'
+			];
+			return response()->json($response, 200);
+		}
     }
 
     /**
@@ -27,22 +34,39 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
+        $students = Student::all();
+        if ($students) {
+        $request->validate([
+            'name' => 'required',
+            'nim' => 'required',
+            'email' => 'required | email',
+            'majority' => 'required',
+        ]);
+
         $input = [
             'name' => $request->name,
             'nim' => $request->nim,
             'email' => $request->email,
             'majority' => $request->majority
-           ];
-    
-           $students = Student::create($input);
-    
-           $response = [
-            'message' => 'Successfully create new student',
+        ];
+
+        $students = Student::create($input);
+
+        $data = [
+            'messages' => 'Succesfuly Update student`',
             'data' => $students
-           ];
-           
-           return response()->json($response, 201);
+        ];
+        
+        return response()->json($data, 201);
+
+    } else {
+        $data = [
+            'message' => 'Student cannot be sent, please complete the data',
+        ];
+
+        return response()->json($data, 400);
     }
+}
 
     /**
      * Display the specified resource.
@@ -58,18 +82,28 @@ class StudentController extends Controller
     public function update(Request $request, string $id)
     {
         $students = Student::find($id);
-        if (!$students) {
-            return response()->json(['message' => 'Student not found'], 404);
+
+        if ($students) {
+            $students->update([
+                'name' => $request->name ?? $students->name,
+                'nim' => $request->nim ?? $students->nim,
+                'email' => $request->email ?? $students->email,
+                'majority' => $request->majority ?? $students->majority
+            ]);
+
+            $data = [
+                'message' => 'Succesfully update student',
+                'data' => $students 
+            ];
+
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'Student not found',
+            ];
+
+            return response()->json($data, 400);
         }
-
-        $students->update($request->only(['name', 'nim','email', 'majority']));
-
-        $response = [
-            'message' => 'Successfully update new student',
-            'data' => $students
-           ];
-        
-           return response()->json($response, 201);
     }
 
     /**
@@ -78,17 +112,22 @@ class StudentController extends Controller
     public function destroy(string $id)
     {
         $students = Student::find($id);
-        if (!$students) {
-            return response()->json(['message' => 'Student not found'], 404);
+
+        if ($students) {
+            $students->delete();
+
+            $data = [
+                'message' => 'Succesfully delete student',
+                'data' => $students
+            ];
+
+            return response()->json($data, 200);
+        } else {
+            $data = [
+                'message' => 'Student not found',
+            ];
+
+            return response()->json($data, 400);
         }
-
-        $students->delete();
-
-        $response = [
-            'message' => 'Successfully delete student',
-            'data' => $students
-           ];
-        
-           return response()->json($response, 201);
     }
 }
