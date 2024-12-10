@@ -15,18 +15,17 @@ class StudentController extends Controller
         
         $students = Student::all();
 
-		if ($students) {
-			$response= [
-				'message' => 'Successfully view all student',
+		if ($students->isEmpty()) {
+			return response()->json([
+				'message' => 'Student not found',
 				'data' => $students,
-			];
-			return response()->json($response, 200);
-		} else {
-			$response = [
-				'message' => 'Student not found'
-			];
-			return response()->json($response, 200);
-		}
+            ], 200);
+        }
+        return response()->json([
+            'massege' => 'Succesfully view all student',
+            'data' => $students
+        ], 200);
+
     }
 
     /**
